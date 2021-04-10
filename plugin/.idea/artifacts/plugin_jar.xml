@@ -3,6 +3,7 @@
     <output-path>$PROJECT_DIR$/../build</output-path>
     <root id="archive" name="plugin.jar">
       <element id="module-output" name="plugin" />
+      <element id="module-output" name="burp" />
     </root>
   </artifact>
 </component>
