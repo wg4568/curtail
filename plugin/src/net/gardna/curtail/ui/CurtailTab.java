@@ -5,10 +5,13 @@ import burp.IHttpService;
 import burp.IMessageEditor;
 import burp.ITab;
 import net.gardna.curtail.Curtail;
-import net.gardna.curtail.actions.MinifyInputAction;
+import net.gardna.curtail.minifier.HttpRequest;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -43,7 +46,35 @@ public class CurtailTab implements ITab {
         this.inputTab.add(inputEditor.getComponent());
         this.outputTab.add(outputEditor.getComponent());
 
-        this.minifyButton.addActionListener(new MinifyInputAction(plugin, this));
+        this.minifyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                IHttpService service;
+                byte[] initial = plugin.getTab().getRequest();
+
+                try {
+                    service = plugin.getTab().getService();
+                } catch (MalformedURLException malformedURLException) {
+                    plugin.getStderr().println("User provided invalid host");
+                    JOptionPane.showMessageDialog(null, "Invalid host", "BurpSuite", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                HttpRequest parser;
+
+                try {
+                    parser = new HttpRequest(new String(initial));
+                } catch (IOException ioException) {
+                    plugin.getStderr().println("User provided invalid request");
+                    JOptionPane.showMessageDialog(null, "Invalid request", "BurpSuite", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                plugin.getStdout().println("Creating dialog with " + parser.getHeaders().size() + " headers");
+                MinifyDialogue dialogue = new MinifyDialogue(plugin, parser);
+                dialogue.setVisible(true);
+            }
+        });
 
         plugin.getCallbacks().customizeUiComponent(tabs);
         plugin.getCallbacks().addSuiteTab(this);

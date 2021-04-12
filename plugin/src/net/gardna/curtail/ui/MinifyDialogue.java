@@ -1,15 +1,21 @@
 package net.gardna.curtail.ui;
 
+import net.gardna.curtail.Curtail;
+import net.gardna.curtail.minifier.HttpRequest;
+import net.gardna.curtail.minifier.MinifyThread;
+
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+
 
 public class MinifyDialogue extends JDialog {
     private JPanel contentPane;
 
-    private JButton buttonOK;
-    private JButton buttonCancel;
+    private JButton buttonTest;
+    private JButton buttonApply;
 
     private JPanel tablePanel;
     private JScrollPane tableScroll;
@@ -17,49 +23,46 @@ public class MinifyDialogue extends JDialog {
 
     private String[] headers;
 
-    public MinifyDialogue(String[] headers) {
-        this.headers = headers;
-
+    public MinifyDialogue(Curtail plugin, HttpRequest request) {
         setContentPane(contentPane);
         setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+        getRootPane().setDefaultButton(buttonTest);
 
-        String[] columnNames = {"Header", "Status"};
-        String[][] data = new String[headers.length][2];
+        this.headers = new String[request.getHeaders().size()];
 
-        for (int i = 0; i < headers.length; i++) {
-            data[i] = new String[]{
-                    headers[i],
-                    "not tested"
-            };
+        int idx = 0;
+        for (String key : request.getHeaders().keySet()) {
+            headers[idx] = key;
+            idx++;
         }
 
-        table = new JTable(data, columnNames);
+        Arrays.sort(headers);
 
-        TableColumnModel model = table.getColumnModel();
-        model.getColumn(0).setPreferredWidth(300);
-        model.getColumn(1).setPreferredWidth(100);
-
+        HeaderTableModel model = new HeaderTableModel(headers);
+        table = new JTable(model);
+        table.getColumnModel().getColumn(0).setCellRenderer(new LabelCellRenderer());
+        table.getColumnModel().getColumn(1).setCellRenderer(new LabelCellRenderer());
         table.setEnabled(false);
+
         tableScroll = new JScrollPane(table);
         tablePanel.add(tableScroll);
 
         setTitle("Auto minifier");
 
+        buttonTest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                MinifyThread thread = new MinifyThread(plugin, MinifyDialogue.this, request);
+                thread.start();
+            }
+        });
+
         pack();
     }
 
     public void updateHeader(String header, String status) {
-        DefaultTableModel model = (DefaultTableModel) table.getModel();
-        for (int i = 0; i < headers.length; i++) {
-            if (headers[i] == header) {
-                model.removeRow(i);
-                model.insertRow(i, new String[]{
-                        header,
-                        status
-                });
-            }
-        }
+        HeaderTableModel model = (HeaderTableModel) table.getModel();
+        model.setValueAt(status, 0, 1);
     }
 
     @Override
