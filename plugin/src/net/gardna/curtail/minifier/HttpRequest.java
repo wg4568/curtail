@@ -82,6 +82,10 @@ public class HttpRequest {
         return headers;
     }
 
+    public String getBody() {
+        return body;
+    }
+
     public byte[] build() {
         String request = getRequestLine() + "\r\n";
 

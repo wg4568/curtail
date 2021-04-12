@@ -62,7 +62,11 @@ public class MinifyDialogue extends JDialog {
 
     public void updateHeader(String header, String status) {
         HeaderTableModel model = (HeaderTableModel) table.getModel();
-        model.setValueAt(status, 0, 1);
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            if (model.getValueAt(i, 0).equals(header))
+                model.setValueAt(status, i, 1);
+        }
     }
 
     @Override

@@ -4,6 +4,7 @@ import burp.IHttpService;
 import net.gardna.curtail.Curtail;
 import net.gardna.curtail.ui.MinifyDialogue;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 public class MinifyThread extends Thread {
@@ -39,8 +40,34 @@ public class MinifyThread extends Thread {
             return;
         }
 
-        byte[] baseline = makeRequest(host, request);
+        String baseline = "";
+        try {
+            baseline = new HttpRequest(new String(makeRequest(host, request))).getBody();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        plugin.getStdout().println(new String(baseline));
+        for (String key : request.getHeaders().keySet()) {
+            plugin.getStdout().println("Testing header: " + key);
+
+            request.disableHeader(key);
+            String testCase = "";
+            try {
+                testCase = new HttpRequest(new String(makeRequest(host, request))).getBody();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            request.enableHeader(key);
+
+            plugin.getStdout().println(key);
+            plugin.getStdout().println(baseline);
+            plugin.getStdout().println(testCase);
+            plugin.getStdout().println("===================");
+            if (baseline.equals(testCase)) {
+                dialogue.updateHeader(key, "not required");
+            } else {
+                dialogue.updateHeader(key, "required");
+            }
+        }
     }
 }
