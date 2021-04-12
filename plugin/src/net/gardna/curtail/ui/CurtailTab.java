@@ -1,9 +1,11 @@
-package net.gardna.curtail;
+package net.gardna.curtail.ui;
 
 import burp.IHttpRequestResponse;
 import burp.IHttpService;
 import burp.IMessageEditor;
 import burp.ITab;
+import net.gardna.curtail.Curtail;
+import net.gardna.curtail.actions.MinifyInputAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,6 +42,8 @@ public class CurtailTab implements ITab {
 
         this.inputTab.add(inputEditor.getComponent());
         this.outputTab.add(outputEditor.getComponent());
+
+        this.minifyButton.addActionListener(new MinifyInputAction(plugin, this));
 
         plugin.getCallbacks().customizeUiComponent(tabs);
         plugin.getCallbacks().addSuiteTab(this);

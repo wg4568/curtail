@@ -1,6 +1,7 @@
 package net.gardna.curtail;
 
 import burp.IBurpExtenderCallbacks;
+import net.gardna.curtail.ui.CurtailTab;
 
 import java.io.PrintWriter;
 

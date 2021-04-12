@@ -2,6 +2,7 @@ package net.gardna.curtail;
 
 import burp.IContextMenuFactory;
 import burp.IContextMenuInvocation;
+import net.gardna.curtail.actions.SendToMinifierAction;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class CurtailMenu implements IContextMenuFactory {
 
         if (invocation.getSelectedMessages().length == 1) {
             JMenuItem sendToMinifier = new JMenuItem("Minify request");
-            sendToMinifier.addActionListener(new MinifyAction(plugin, invocation));
+            sendToMinifier.addActionListener(new SendToMinifierAction(plugin, invocation));
 
             items.add(sendToMinifier);
         }
